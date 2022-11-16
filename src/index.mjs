@@ -19,7 +19,7 @@ const shrimpChars = ["s", "h", "r", "i", "m", "p"]
 // Message Sent
 client.on("messageCreate", (msg) => {
     const lowerMsg = msg.content.toLowerCase()
-    if (shrimpChars.some(char=>lowerMsg.includes(char))){
+    if (shrimpChars.every(char=>lowerMsg.includes(char))){
         msg.createReaction("🦐").catch(err=>{})
     }
 });
