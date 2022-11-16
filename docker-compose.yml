@@ -5,9 +5,9 @@ volumes:
     external: true
 
 services:
-  bot:
+  shrimpbot:
     restart: unless-stopped
     build: ./src
     volumes:
       - ShrimpStatic:/static
-    container_name: Bot
+    container_name: shrimpBot
