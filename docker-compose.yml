@@ -1,0 +1,13 @@
+version: "3"
+
+volumes:
+  ShrimpStatic:
+    external: true
+
+services:
+  bot:
+    restart: unless-stopped
+    build: ./src
+    volumes:
+      - ShrimpStatic:/static
+    container_name: Bot
