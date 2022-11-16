@@ -17,7 +17,7 @@ client.on("error", (error) => {
 
 const shrimpChars = ["s", "h", "r", "i", "m", "p"]
 // Message Sent
-bot.on("messageCreate", (msg) => {
+client.on("messageCreate", (msg) => {
     const lowerMsg = msg.content.toLowerCase()
     if (shrimpChars.some(char=>lowerMsg.includes(char))){
         msg.createReaction("🦐").catch(err=>{})
