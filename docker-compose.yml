@@ -3,6 +3,8 @@ version: "3"
 volumes:
   ShrimpStatic:
     external: true
+  ShrimpDB:
+    external: true
 
 services:
   shrimpbot:
@@ -11,3 +13,19 @@ services:
     volumes:
       - ShrimpStatic:/static
     container_name: shrimpBot
+    ports:
+      - 8114:8114
+
+  shrimppostgres:
+    restart: unless-stopped
+    image: postgres:12-alpine
+    environment:
+      - POSTGRES_USER=shrimpbot
+      - POSTGRES_PASSWORD=337823521
+      - POSTGRES_DB=shrimpdb
+    ports:
+      - 5436:5432
+    volumes:
+      - ./schema.postgresql.sql:/docker-entrypoint-initdb.d/schema.postgresql.sql:ro
+      - ShrimpDB:/var/lib/postgresql/data
+    container_name: shrimpDB
