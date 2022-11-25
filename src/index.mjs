@@ -74,7 +74,7 @@ const API = fastify();
 
 // register the static plugin for hosting static assets
 API.register(fastifyStatic, {
-    root: path.resolve("./site/assets/img/"),
+    root: path.resolve("./site/assets/"),
     prefix: '/static/'
 })
 
@@ -90,7 +90,7 @@ API.get('/', async (request, reply) => {
     reply
     .code(200)
     .header('Content-Type', 'text/html; charset=utf-8')
-    .send(`<head><title>${count} Shrimps</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#c16a4f"><link rel="icon" sizes="192x192" href="/static/shrimp.svg"></head><body><h1><span></span>${count}<img class="shrimp" src="/static/shrimp.svg"></h1></body>`)
+    .send(`<head><title>${count} Shrimps</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#c16a4f"><link rel="icon" sizes="192x192" href="/static/img/shrimp.svg"><style>body{margin:0;width:100%;height:100%;display:flex;justify-content: center; align-items: center; font-family: 'Courier New', Courier, monospace;} .shrimp {width:2em;height:2em;vertical-align: middle;}</style></head><body><h1><span>${count}</span><img class="shrimp" src="/static/img/shrimp.svg"></h1></body>`)
 })
 
 // start the web server
