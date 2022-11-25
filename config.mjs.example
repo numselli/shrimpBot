@@ -1,0 +1,9 @@
+export const Token = 'Bot TOKEN'
+export const Postgrelogin = {
+    "user": "shrimpbot",
+    "database": "shrimpdb",
+    "password": "337823521",
+    "host": "shrimppostgres",
+    "port": 5432,
+    "idle_timeout": 10,
+}
