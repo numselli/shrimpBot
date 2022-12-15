@@ -32,16 +32,23 @@ const client = new Client({
     }
 });
 
-// when the bot is ready
-client.on("ready", async() => {
+// every time the bot turns ready
+client.on("ready", () => {
     // set the status to do not disturb
     client.editStatus("dnd");
-
-    // log the username of the bot user
-    console.log("Ready as", client.user.tag)
-
+});
+// the first time the bot is ready
+client.once("ready", async() => {
     // ensure that the shrimp stats row exists
     await DB`INSERT INTO stats (count, id) VALUES (0, 'shrimps') ON CONFLICT (id) DO NOTHING`.catch(err=>{})
+
+    client.application.bulkEditGlobalCommands([
+        {
+            "name": "shrimpcount",
+            "type": 1,
+            "description": "The number of shrimps."
+        }
+    ])
 });
 
 // An error handler
@@ -64,6 +71,23 @@ client.on("messageCreate", (msg) => {
         DB`UPDATE stats SET count = count+1 WHERE id = 'shrimps'`.catch(err=>{})
     }
 });
+
+// when an interaction is created 
+client.on("interactionCreate", async(interaction) => {
+    switch (interaction.data.name){
+        case "shrimpcount": {
+            // get shrimp count from database
+            const dbResult = await DB`SELECT count FROM stats WHERE id = 'shrimps'`.catch(err=>{})
+
+            // format the number
+            const count = (dbResult[0]?.count ?? 0).toLocaleString()
+        
+            // respond to the interaction
+            interaction.createMessage({"embeds": [{"description": `[${count} shrimps.](https://shrimp.numselli.xyz)`, "color": 16742221}]}).catch(()=>{});
+        }
+        break;
+    }
+})
 
 // Connect to Discord
 client.connect();
