@@ -2,7 +2,7 @@
   "dependencies": {
     "@fastify/static": "^6.10.2",
     "fastify": "^4.17.0",
-    "oceanic.js": "^1.7.0",
+    "oceanic.js": "github:counting-bot/oceanic#build",
     "postgres": "^3.3.5"
   }
 }
