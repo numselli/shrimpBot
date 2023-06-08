@@ -118,11 +118,6 @@ API.get('/', async (request, reply) => {
     .send(`<head><title>${count} Shrimps</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#c16a4f"><link rel="icon" sizes="192x192" href="/static/img/shrimp.svg"><style>body{margin:0;width:100%;height:100%;display:flex;justify-content: center; align-items: center; font-family: 'Courier New', Courier, monospace;} .shrimp {width:2em;height:2em;vertical-align: middle;}</style></head><body><h1><span>${count}</span><img class="shrimp" src="/static/img/shrimp.svg"></h1></body>`)
 })
 
-// redirect /invite to the discord invite
-API.get('/invite', async (request, reply) => {
-    redirect(303, `https://discord.com/oauth2/authorize?client_id=${client.user.id}&permissions=65600&scope=bot`)
-})
-
 // start the web server
 API.listen({ port: 8114, host: "0.0.0.0" }, (err, address) => {
     console.log(`API live on 0.0.0.0:8114`)
