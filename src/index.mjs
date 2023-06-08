@@ -57,36 +57,41 @@ client.on("error", (error) => {
     console.error("Something went wrong:", error);
 });
 
-// when a message is sent check if the message includes the letters of shrimp
 const shrimpChars = ["s", "h", "r", "i", "m", "p"]
-client.on("messageCreate", (msg) => {
-    // convert the message to lower case
-    const lowerMsg = msg.content.toLowerCase()
 
-    // check if the message has the letters
-    if (shrimpChars.every(char=>lowerMsg.includes(char))){
-        // if it has the letters add the reaction
-        msg.createReaction("🦐").catch(err=>{})
+client.on("packet", async(packet) => {
+    switch (packet.t){
+        // when a message is sent check if the message includes the letters of shrimp
+        case "MESSAGE_CREATE": {
+            // convert the message to lower case
+            const lowerMsg = packet.d.content.toLowerCase()
 
-        // add one to the shrimp count
-        DB`UPDATE stats SET count = count+1 WHERE id = 'shrimps'`.catch(err=>{})
-    }
-});
-
-// when an interaction is created 
-client.on("interactionCreate", async(interaction) => {
-    switch (interaction.data.name){
-        case "shrimpcount": {
-            // get shrimp count from database
-            const dbResult = await DB`SELECT count FROM stats WHERE id = 'shrimps'`.catch(err=>{})
-
-            // format the number
-            const count = (dbResult[0]?.count ?? 0).toLocaleString()
-        
-            // respond to the interaction
-            interaction.createMessage({"embeds": [{"description": `[${count} shrimps.](https://shrimp.numselli.xyz)`, "color": 16742221}]}).catch(()=>{});
+            // check if the message has the letters
+            if (shrimpChars.every(char=>lowerMsg.includes(char))){
+                // if it has the letters add the reaction
+                client.rest.channels.createReaction(packet.d.channel_id, packet.d.id, "🦐").catch(()=>{});
+                
+                // add one to the shrimp count
+                DB`UPDATE stats SET count = count+1 WHERE id = 'shrimps'`.catch(err=>{})
+            }
+            break;
         }
-        break;
+        case "INTERACTION_CREATE": {
+            switch (packet.d.data.name){
+                case "shrimpcount": {
+                    // get shrimp count from database
+                    const dbResult = await DB`SELECT count FROM stats WHERE id = 'shrimps'`.catch(err=>{})
+        
+                    // format the number
+                    const count = (dbResult[0]?.count ?? 0).toLocaleString()
+
+                    // respond to the interaction
+                    client.rest.interactions.createInteractionResponse(packet.d.id, packet.d.token, { type: 4, data: {"embeds": [{"description": `[${count} shrimps.](https://shrimp.numselli.xyz)`, "color": 16742221}]}}).catch(()=>{});
+                }
+                break;
+            }
+            break;
+        }
     }
 })
 
