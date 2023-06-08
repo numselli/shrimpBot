@@ -1,4 +1,4 @@
-FROM node:18.11.0-alpine3.15
+FROM node:20.2.0-alpine3.17
 
 ENV NODE_ENV production
 
