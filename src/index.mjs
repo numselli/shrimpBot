@@ -27,6 +27,7 @@ const DB = postgres(
 // create the discord client
 const client = new Client({
     auth: Token,
+    disableCache: "no-warning",
     gateway: {
         intents: ["GUILD_MESSAGES", "MESSAGE_CONTENT"]
     }
