@@ -52,8 +52,7 @@ API.get("/*", (req, reply) => {
 
 // start the web server
 export default () => {
-    // API.listen({ port: 8114, host: "0.0.0.0" }, (err, address) => {
-    API.listen({ port: 80, host: "0.0.0.0" }, (err, address) => {
+    API.listen({ port: 8114, host: "0.0.0.0" }, (err, address) => {
         console.log(`API live on 0.0.0.0:8114`)
         if (err) throw err
     });
