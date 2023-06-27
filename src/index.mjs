@@ -8,5 +8,3 @@ const wss = new WebSocketServer({
     server: API.server,
     path: "/ws"
 });
-
-// startBot(wss)
