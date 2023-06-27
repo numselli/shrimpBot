@@ -5,7 +5,7 @@ import fastifyStatic from '@fastify/static'
 import fastifyView from '@fastify/view';
 import ejs from 'ejs'
 import db from "./utils/db.mjs";
-import {siteHost} from './static/config.mjs'
+import {siteHost} from '/static/config.mjs'
 
 // create a fastify webserver
 const API = fastify();

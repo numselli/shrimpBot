@@ -3,7 +3,7 @@ import { Client } from "oceanic.js"
 import db from "./utils/db.mjs";
 
 // import config
-import { Token, botID } from "./static/config.mjs"
+import { Token, botID } from "/static/config.mjs"
 
 // discord stuff
 // create the discord client
