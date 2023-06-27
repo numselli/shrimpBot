@@ -1,0 +1,17 @@
+.footer {
+    position: sticky;
+    bottom: 0;
+    color: #000000;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.footer a:link, .footer a:visited, .footer a:active{
+    color: #000000;
+}
+  
+.shrimpImg {
+    width: 1.5em;
+    height: 1.5em;
+    vertical-align: middle;
+}

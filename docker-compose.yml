@@ -23,8 +23,6 @@ services:
       - POSTGRES_USER=shrimpbot
       - POSTGRES_PASSWORD=337823521
       - POSTGRES_DB=shrimpdb
-    ports:
-      - 5436:5432
     volumes:
       - ./schema.postgresql.sql:/docker-entrypoint-initdb.d/schema.postgresql.sql:ro
       - ShrimpDB:/var/lib/postgresql/data

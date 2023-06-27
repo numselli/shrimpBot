@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Primary Meta Tags -->
+        <title><%= count.toLocaleString() %> Shrimps</title>
+        <meta name="title" content='<%= count.toLocaleString() %> Shrimps' />
+        <meta name="description" content="Shrimpify your Discord server." />
+        <link rel="icon" sizes="192x192" href="/static/img/shrimp.svg">
+        <meta name="theme-color" content="#c16a4f">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content=<%= host %> />
+        <meta property="og:title" content='<%= count.toLocaleString() %> Shrimps' />
+        <meta property="og:description" content="Shrimpify your Discord server." />
+        <meta property="og:image" content="<%= host %>/static/img/shrimp.svg" />
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary" />
+        <meta property="twitter:url" content=<%= host %> />
+        <meta property="twitter:title" content='<%= count.toLocaleString() %> Shrimps' />
+        <meta property="twitter:description" content="Shrimpify your Discord server." />
+        <meta property="twitter:image" content="<%= host %>/static/img/shrimp.svg" />
+
+        <link rel="stylesheet" type="text/css" href="/static/css/index.css"/>
+        <script type="text/javascript" src="/static/js/index.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/css/global.css"/>
+    </head>
+
+    <body>
+        <div class="container">
+            <h1><span id="count"><%= count.toLocaleString() %></span><img class="shrimp" alt="shrimp emoji" src="/static/img/shrimp.svg"></h1>
+        </div>
+
+        <%- include('./partials/footer'); %>
+    </body>
+</html>

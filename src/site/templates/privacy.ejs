@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Primary Meta Tags -->
+        <title>Privacy</title>
+        <meta name="title" content="Privacy" />
+        <meta name="description" content="Shrimpify your Discord server." />
+        <link rel="icon" sizes="192x192" href="/static/img/shrimp.svg">
+        <meta name="theme-color" content="#c16a4f">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content=<%= host %> />
+        <meta property="og:title" content="Privacy" />
+        <meta property="og:description" content="Shrimpify your Discord server." />
+        <meta property="og:image" content="<%= host %>/static/img/shrimp.svg" />
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary" />
+        <meta property="twitter:url" content=<%= host %> />
+        <meta property="twitter:title" content="Privacy" />
+        <meta property="twitter:description" content="Shrimpify your Discord server." />
+        <meta property="twitter:image" content="<%= host %>/static/img/shrimp.svg" />
+
+        <link rel="stylesheet" type="text/css" href="/static/css/materialize.min.css"/>
+        <link rel="stylesheet" type="text/css" href="/static/css/global.css"/>
+        <link rel="stylesheet" type="text/css" href="/static/css/privacy.css"/>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="section">
+                <div class="center-align">
+                    <h2>Privacy Policy</h2>
+                    <span>Last updated: <%= new Date(1687859810888).toLocaleDateString() %></span>
+                </div>
+                <div>
+                    <div class="center-align">
+                        <h4>1. Data Collected</h4>
+                    </div><span>We will not knowingly store sensitive data, identifying data, unnecessary data, or data
+                        which is not used in our bot's features. <br>Collected data includes:</span>
+                    <ul class="browser-default">
+                        <li>The number of shrimps captured</li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="center-align">
+                        <h4>2. Data Usage</h4>
+                    </div><span>The collected data will only be used to provide the bot's features.</span>
+                </div>
+                <div>
+                    <div class="center-align">
+                        <h4>3. Updating Data</h4>
+                    </div><span>Updating data will require the action of a user. The stored data will be updated when a message is recived that contains the letters SHRIMP (case-insensitive).</span>
+                </div>
+                <div>
+                    <div class="center-align">
+                        <h4>4. Data Deletion</h4>
+                    </div><span>Data can not be deleted for this bot</span>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div class="section">
+                <div class="center-align">
+                    <h2>Terms of Service</h2>
+                </div>
+                <ul class="browser-default">
+                    <li>Have fun shrimping with your friends.</li>
+                </ul>
+            </div>
+        </div>
+
+        <%- include('./partials/footer'); %>
+    </body>
+</html>

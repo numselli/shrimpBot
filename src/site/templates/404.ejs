@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Primary Meta Tags -->
+        <title>Page not found</title>
+        <meta name="title" content="Page not found" />
+        <meta name="description" content="Shrimpify your Discord server." />
+        <link rel="icon" sizes="192x192" href="/static/img/shrimp.svg">
+        <meta name="theme-color" content="#c16a4f">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content=<%= host %> />
+        <meta property="og:title" content="Page not found" />
+        <meta property="og:description" content="Shrimpify your Discord server." />
+        <meta property="og:image" content="<%= host %>/static/img/shrimp.svg" />
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary" />
+        <meta property="twitter:url" content=<%= host %> />
+        <meta property="twitter:title" content="Page not found" />
+        <meta property="twitter:description" content="Shrimpify your Discord server." />
+        <meta property="twitter:image" content="<%= host %>/static/img/shrimp.svg" />
+
+
+        <link rel="stylesheet" type="text/css" href="/static/css/404.css"/>
+        <link rel="stylesheet" type="text/css" href="/static/css/global.css"/>
+    </head>
+
+    <body>
+        <div id="notfound">
+            <div class="notfound">
+                <div class="notfound-404">
+                    <h1>404</h1>
+                    <h2>Page not found</h2>
+                </div>
+                <a href="/">Homepage</a>
+            </div>
+        </div>
+
+        <%- include('./partials/footer'); %>
+    </body>
+</html>

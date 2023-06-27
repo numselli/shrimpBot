@@ -1,9 +1,9 @@
 export const Token = 'Bot TOKEN'
+export const botID = '1042495791694086194'
+export const siteHost = 'https://shrimp.numselli.xyz'
 export const Postgrelogin = {
     "user": "shrimpbot",
-    "database": "shrimpdb",
     "password": "337823521",
     "host": "shrimppostgres",
     "port": 5432,
-    "idle_timeout": 10,
 }
