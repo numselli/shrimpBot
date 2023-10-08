@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@fastify/static": "^6.10.2",
-    "@fastify/view": "^7.4.1",
+    "@fastify/view": "^8.2.0",
     "ejs": "^3.1.9",
     "fastify": "^4.17.0",
     "ioredis": "^5.3.2",
