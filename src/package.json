@@ -4,7 +4,8 @@
     "@fastify/view": "^7.4.1",
     "ejs": "^3.1.9",
     "fastify": "^4.17.0",
-    "oceanic.js": "github:counting-bot/oceanic#build",
+    "ioredis": "^5.3.2",
+    "oceanic.js": "^1.8.1",
     "postgres": "^3.3.5",
     "ws": "^8.13.0"
   }

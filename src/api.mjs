@@ -5,57 +5,66 @@ import fastifyStatic from '@fastify/static'
 import fastifyView from '@fastify/view';
 import ejs from 'ejs'
 import db from "./utils/db.mjs";
-import {siteHost} from '/static/config.mjs'
+import {siteHost} from './static/config.mjs'
 
-// create a fastify webserver
-const API = fastify();
+export default class api{
+    constructor(botsArray){
+        this.botsArray = botsArray
 
-// register the static plugin for hosting static assets
-API.register(fastifyStatic, {
-    root: path.resolve("./site/assets/"),
-    prefix: '/static/'
-})
+        // create a fastify webserver
+        this.API = fastify();
 
-// use ejs for templating
-API.register(fastifyView, {
-    engine: {
-        ejs
-    },
-});
+        // register the static plugin for hosting static assets
+        this.API.register(fastifyStatic, {
+            root: path.resolve("./site/assets/"),
+            prefix: '/static/'
+        })
 
-// listen to get requests on /
-API.get("/", async(req, reply) => {
-    // get shrimp count from database
-    const dbResult = await db`SELECT count FROM stats WHERE id = 'shrimps'`.catch(err=>{})
-    
-    // render and send main page
-    return reply.view("/site/templates/index.ejs", { count: dbResult[0]?.count, host: siteHost });
-});
+        // use ejs for templating
+        this.API.register(fastifyView, {
+            engine: {
+                ejs
+            },
+        });
 
-// render and send privacy page
-API.get("/privacy", (req, reply) => {
-    reply.view("/site/templates/privacy.ejs", {host: siteHost});
-});
+        // listen to get requests on /
+        this.API.get("/", async(req, reply) => {
+            // get shrimp count from database
+            const dbResult = await db`SELECT count FROM stats WHERE id = 'shrimps'`.catch(err=>{})
+            
+            // render and send main page
+            return reply.view("/site/templates/index.ejs", { count: dbResult[0]?.count, host: siteHost });
+        });
 
-// robots.txt file
-API.get('/robots.txt', (req, reply) => {
-    reply.send(`
-    user-agent: *
-    Disallow: /assets/
-    `)
-})
+        // render and send privacy page
+        this.API.get("/privacy", (req, reply) => {
+            reply.view("/site/templates/privacy.ejs", {host: siteHost});
+        });
 
-// send 404 page for all other pages
-API.get("/*", (req, reply) => {
-    reply.view("/site/templates/404.ejs", {host: siteHost});
-});
+        this.API.get("/invite", (req, reply) => {
+            reply.view("/site/templates/invite.ejs", {bots: this.botsArray, host: siteHost});
+        });
 
-// start the web server
-export default () => {
-    API.listen({ port: 8114, host: "0.0.0.0" }, (err, address) => {
-        console.log(`API live on 0.0.0.0:8114`)
-        if (err) throw err
-    });
+        // robots.txt file
+        this.API.get('/robots.txt', (req, reply) => {
+            reply.send(`
+            user-agent: *
+            Disallow: /assets/
+            `)
+        })
 
-    return API
+        // send 404 page for all other pages
+        this.API.get("/*", (req, reply) => {
+            reply.view("/site/templates/404.ejs", {host: siteHost});
+        });
+    }
+
+    start(){
+        this.API.listen({ port: 8114, host: "0.0.0.0" }, (err, address) => {
+            console.log(`API live on 0.0.0.0:8114`)
+            if (err) throw err
+        });
+
+        return this.API
+    }
 }

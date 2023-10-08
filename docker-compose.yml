@@ -5,6 +5,8 @@ volumes:
     external: true
   ShrimpDB:
     external: true
+  shrimpcache:
+    external: true
 
 services:
   shrimpbot:
@@ -27,3 +29,11 @@ services:
       - ./schema.postgresql.sql:/docker-entrypoint-initdb.d/schema.postgresql.sql:ro
       - ShrimpDB:/var/lib/postgresql/data
     container_name: shrimpDB
+    
+  shrimpcache:
+    restart: unless-stopped
+    image: redis:7.2.1-alpine
+    command: redis-server --loglevel warning
+    volumes:
+      - shrimpcache:/data
+    container_name: shrimpCache

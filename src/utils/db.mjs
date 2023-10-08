@@ -1,5 +1,6 @@
 import postgres from "postgres";
-import { Postgrelogin } from "/static/config.mjs"
+import { Postgrelogin } from "../static/config.mjs"
+
 export default postgres(
     {
         ...Postgrelogin,

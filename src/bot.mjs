@@ -1,94 +1,106 @@
-// import deps
 import { Client } from "oceanic.js"
-import db from "./utils/db.mjs";
-
-// import config
-import { Token, botID } from "/static/config.mjs"
-
-// discord stuff
-// create the discord client
-const client = new Client({
-    auth: Token,
-    gateway: {
-        intents: ["GUILD_MESSAGES", "MESSAGE_CONTENT"]
-    }
-});
-
-// every time the bot turns ready
-client.on("ready", () => {
-    // set the status to do not disturb
-    client.editStatus("dnd");
-});
-// the first time the bot is ready
-client.once("ready", async() => {
-    // ensure that the shrimp stats row exists
-    await db`INSERT INTO stats (count, id) VALUES (0, 'shrimps') ON CONFLICT (id) DO NOTHING`.catch(err=>{})
-
-    // create shrimpcount slash command
-    client.rest.applicationCommands.bulkEditGlobalCommands(botID, [
-        {
-            "name": "shrimpcount",
-            "type": 1,
-            "description": "The number of shrimps."
-        }
-    ])
-});
-
-// An error handler
-client.on("error", (error) => {
-    console.error("Something went wrong:", error);
-});
+import Redis from "ioredis"
 
 const shrimpChars = ["s", "h", "r", "i", "m", "p"]
 
-client.on("packet", async(packet) => {
-    switch (packet.t){
-        // when a message is sent check if the message includes the letters of shrimp
-        case "MESSAGE_CREATE": {
-            // convert the message to lower case
-            const lowerMsg = packet.d.content.toLowerCase()
-
-            // check if the message has the letters
-            if (shrimpChars.every(char=>lowerMsg.includes(char))){
-                // if it has the letters add the reaction
-                client.rest.channels.createReaction(packet.d.channel_id, packet.d.id, "🦐").catch(()=>{});
-                
-                // add one to the shrimp count
-                const shrimpCount = await db`UPDATE stats SET count = count+1 WHERE id = 'shrimps' RETURNING count`.catch(err=>{})
-                brodcastToWs(shrimpCount[0].count)
-            }
-            break;
-        }
-        case "INTERACTION_CREATE": {
-            switch (packet.d.data.name){
-                case "shrimpcount": {
-                    // get shrimp count from database
-                    const dbResult = await db`SELECT count FROM stats WHERE id = 'shrimps'`.catch(err=>{})
+export default class shrimpBot{
+    #client
+    #redisPub
+    #redisCache
+    constructor(clientInfo){
+        this.id = clientInfo.botID
+        this.guildCount = 0
         
-                    // format the number
-                    const count = (dbResult[0]?.count ?? 0).toLocaleString()
-
-                    // respond to the interaction
-                    client.rest.interactions.createInteractionResponse(packet.d.id, packet.d.token, { type: 4, data: {"embeds": [{"description": `[${count} shrimps captured.](https://shrimp.numselli.xyz)`, "color": 16742221}]}}).catch(()=>{});
-                }
-                break;
+        // create the discord client
+        this.#client = new Client({
+            auth: clientInfo.token,
+            disableCache: "no-warning",
+            gateway: {
+                intents: ["GUILDS", "GUILD_MESSAGES", "MESSAGE_CONTENT"]
             }
-            break;
-        }
+        });
+
+        this.#redisPub = new Redis(6379, process.env.NODE_ENV === "production" ? "cache" : "127.0.0.1");
+        this.#redisCache = new Redis(6379, process.env.NODE_ENV === "production" ? "cache" : "127.0.0.1");
+
+        // every time the bot turns ready
+        this.#client.on("ready", () => {
+            this.#client.editStatus("dnd");
+        });
+
+        // the first time the bot is ready
+        this.#client.once("ready", async() => {
+            // create shrimpcount slash command
+            client.rest.applicationCommands.bulkEditGlobalCommands(botID, [
+                {
+                    "name": "shrimpcount",
+                    "type": 1,
+                    "description": "The number of shrimps."
+                }
+            ])
+        });
+
+        // An error handler
+        this.#client.on("error", (error) => {
+            console.error("Something went wrong:", error);
+        });
+
+        this.#client.on("packet", async(packet) => {
+            // console.log(packet.t)
+            switch (packet.t){
+                // when a message is sent check if the message includes the letters of shrimp
+                case "MESSAGE_CREATE": {
+                    // convert the message to lower case
+                    const lowerMsg = packet.d.content.toLowerCase()
+        
+                    // check if the message has the letters
+                    if (shrimpChars.every(char=>lowerMsg.includes(char))){
+                        // if it has the letters add the reaction
+                        this.#client.rest.channels.createReaction(packet.d.channel_id, packet.d.id, "🦐").catch(()=>{});
+
+                        // brodcast new shrimp
+                        this.#redisPub.publish("newShrimp", "") 
+                    }
+                    break;
+                }
+                case "INTERACTION_CREATE": {
+                    switch (packet.d.data.name){
+                        case "shrimpcount": {
+                            // get shrimp count from database
+                            const dbResult = await db`SELECT count FROM stats WHERE id = 'shrimps'`.catch(err=>{})
+                
+                            // format the number
+                            const count = (dbResult[0]?.count ?? 0).toLocaleString()
+        
+                            // respond to the interaction
+                            this.#client.rest.interactions.createInteractionResponse(packet.d.id, packet.d.token, { type: 4, data: {"embeds": [{"description": `[${count} shrimps captured.](https://shrimp.numselli.xyz)`, "color": 16742221}]}}).catch(()=>{});
+                        }
+                        break;
+                    }
+                    break;
+                }
+                case "GUILD_CREATE":{
+                    const redisData = await this.#redisCache.get(`shrimpGuild:${packet.d.id}`);
+                    console.log(redisData)
+                    if (redisData && packet.d.id !== redisData) return await this.#client.rest.users.leaveGuild(packet.d.id)
+
+                    this.guildCount++;
+
+                    this.#redisCache.set(`shrimpGuild:${packet.d.id}`, this.id)
+
+                    break;
+                }
+                case "GUILD_DELETE":{
+                    this.guildCount--;
+
+                    this.#redisCache.del(`shrimpGuild:${packet.d.id}`)
+                    break;
+                }
+            }
+        })
     }
-})
 
-
-
-export default (ws) => {
-    client.ws = ws
-    // Connect to Discord
-    client.connect();
-}
-
-// brodcast to everyone on the website that a new shrimp has been captured
-const brodcastToWs = (count) => {
-    Array.from(client.ws.clients).map(client => {
-        if (client.readyState === 1) client.send(count);
-    })
+    connect(){
+        this.#client.connect()
+    }
 }
