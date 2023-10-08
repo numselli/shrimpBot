@@ -31,7 +31,7 @@ export default class shrimpBot{
         // the first time the bot is ready
         this.#client.once("ready", async() => {
             // create shrimpcount slash command
-            this.#client.rest.applicationCommands.bulkEditGlobalCommands(botID, [
+            this.#client.rest.applicationCommands.bulkEditGlobalCommands(this.id, [
                 {
                     "name": "shrimpcount",
                     "type": 1,
