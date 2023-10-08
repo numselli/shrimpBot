@@ -56,7 +56,7 @@ subscribeRedis.on("message", async (channel, message) => {
         case "newShrimp": {
             const shrimpCount = await db`UPDATE stats SET count = count+1 WHERE id = 'shrimps' RETURNING count`.catch(err=>{})
             Array.from(wss.clients).map(client => {
-                if (client.readyState === 1) client.send(shrimpCount);
+                if (client.readyState === 1) client.send(shrimpCount.count);
             })
         }
         break;
