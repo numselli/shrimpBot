@@ -81,7 +81,6 @@ export default class shrimpBot{
                 }
                 case "GUILD_CREATE":{
                     const redisData = await this.#redisCache.get(`shrimpGuild:${packet.d.id}`);
-                    console.log(redisData)
                     if (redisData && packet.d.id !== redisData) return await this.#client.rest.users.leaveGuild(packet.d.id)
 
                     this.guildCount++;

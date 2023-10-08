@@ -13,7 +13,7 @@ db`INSERT INTO stats (count, id) VALUES (0, 'shrimps') ON CONFLICT (id) DO NOTHI
 const ioredis = new Redis(6379, process.env.NODE_ENV === "production" ? "shrimpcache" : "127.0.0.1");
 const stream = ioredis.scanStream({
     match: 'shrimpGuild:*'
-  });
+});
 
 await new Promise((resolve, reject) => {
     stream.on('data', function (keys) {
@@ -29,16 +29,25 @@ await new Promise((resolve, reject) => {
 
     stream.on('end', resolve);
 })
+function delay(t, data) {
+    return new Promise(resolve => {
+        setTimeout(resolve, t, data);
+    });
+}
 
-const botsArray = tokens.map((botToken, index) => {
+
+const botsArray = []
+for (let index = 0; index < botIDs.length; index++) {
     const botInstance = new bot({
         botID: botIDs[index],
-        token: botToken
+        token: tokens[index]
     })
-    botInstance.connect()
 
-    return botInstance;
-})
+    botInstance.connect()
+    botsArray.push(botInstance)
+
+    await delay(1000*5)
+}
 
 const expandedAPI = new startAPI(botsArray)
 const API = expandedAPI.start()
@@ -56,7 +65,7 @@ subscribeRedis.on("message", async (channel, message) => {
         case "newShrimp": {
             const shrimpCount = await db`UPDATE stats SET count = count+1 WHERE id = 'shrimps' RETURNING count`.catch(err=>{})
             Array.from(wss.clients).map(client => {
-                if (client.readyState === 1) client.send(shrimpCount.count);
+                if (client.readyState === 1) client.send(shrimpCount[0].count);
             })
         }
         break;
