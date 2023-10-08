@@ -5,7 +5,7 @@ import startAPI from './api.mjs'
 import bot from "./bot.mjs"
 import db from "./utils/db.mjs";
 
-import { tokens, botIDs } from "./static/config.mjs"
+import { tokens, botIDs } from "/static/config.mjs"
 
 // init db
 db`INSERT INTO stats (count, id) VALUES (0, 'shrimps') ON CONFLICT (id) DO NOTHING`.catch(err=>{})
@@ -26,7 +26,7 @@ await new Promise((resolve, reject) => {
             pipeline.exec();
         }
     });
-    
+
     stream.on('end', resolve);
 })
 
