@@ -20,8 +20,8 @@ export default class shrimpBot{
             }
         });
 
-        this.#redisPub = new Redis(6379, process.env.NODE_ENV === "production" ? "cache" : "127.0.0.1");
-        this.#redisCache = new Redis(6379, process.env.NODE_ENV === "production" ? "cache" : "127.0.0.1");
+        this.#redisPub = new Redis(6379, process.env.NODE_ENV === "production" ? "shrimpcache" : "127.0.0.1");
+        this.#redisCache = new Redis(6379, process.env.NODE_ENV === "production" ? "shrimpcache" : "127.0.0.1");
 
         // every time the bot turns ready
         this.#client.on("ready", () => {

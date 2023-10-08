@@ -10,7 +10,7 @@ import { tokens, botIDs } from "/static/config.mjs"
 // init db
 db`INSERT INTO stats (count, id) VALUES (0, 'shrimps') ON CONFLICT (id) DO NOTHING`.catch(err=>{})
 
-const ioredis = new Redis(6379, process.env.NODE_ENV === "production" ? "cache" : "127.0.0.1");
+const ioredis = new Redis(6379, process.env.NODE_ENV === "production" ? "shrimpcache" : "127.0.0.1");
 const stream = ioredis.scanStream({
     match: 'shrimpGuild:*'
   });
@@ -48,7 +48,7 @@ const wss = new WebSocketServer({
     path: "/ws"
 });
 
-const subscribeRedis = new Redis(6379, process.env.NODE_ENV === "production" ? "cache" : "127.0.0.1");
+const subscribeRedis = new Redis(6379, process.env.NODE_ENV === "production" ? "shrimpcache" : "127.0.0.1");
 
 subscribeRedis.subscribe("newShrimp");
 subscribeRedis.on("message", async (channel, message) => {
