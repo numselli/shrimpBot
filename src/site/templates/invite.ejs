@@ -30,6 +30,9 @@
 
     <body>
         <div class="container">
+            <h3 class="center-align">Invite shrimp</h3>
+            <h6 class="center-align">If shrimp is already in your guild and a second one is invited, the second one will automatically leave.</h6>
+
             <% for(var i=0; i<bots.length; i++) {%>
                 <div class="center-align">
                     <a href="https://discord.com/oauth2/authorize?client_id=<%= bots[i].id %>&permissions=65600&scope=bot" target="_blank" rel="noopener noreferrer">Shrimp bot <%= i %></a>
