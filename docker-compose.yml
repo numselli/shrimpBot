@@ -10,7 +10,6 @@ volumes:
 
 services:
   shrimpbot:
-    restart: unless-stopped
     build: ./src
     volumes:
       - ShrimpStatic:/static

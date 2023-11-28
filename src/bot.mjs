@@ -42,6 +42,8 @@ export default class shrimpBot{
 
         // An error handler
         this.#client.on("error", (error) => {
+            if (error.message.includes("Server didn't acknowledge previous heartbeat"))  process.exit();
+
             console.error("Something went wrong:", error);
         });
 
