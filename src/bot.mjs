@@ -1,5 +1,6 @@
 import { Client } from "oceanic.js"
 import Redis from "ioredis"
+import db from './utils/db.mjs'
 
 const shrimpChars = ["s", "h", "r", "i", "m", "p"]
 
