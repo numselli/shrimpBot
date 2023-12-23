@@ -1,13 +1,10 @@
 import { Client } from "oceanic.js"
-import Redis from "ioredis"
 import db from './utils/db.mjs'
 
 const shrimpChars = ["s", "h", "r", "i", "m", "p"]
 
 export default class shrimpBot{
     #client
-    #redisPub
-    #redisCache
     constructor(clientInfo){
         this.id = clientInfo.botID
         this.guildCount = 0
@@ -20,9 +17,6 @@ export default class shrimpBot{
                 intents: ["GUILDS", "GUILD_MESSAGES", "MESSAGE_CONTENT"]
             }
         });
-
-        this.#redisPub = new Redis(6379, process.env.NODE_ENV === "production" ? "shrimpcache" : "127.0.0.1");
-        this.#redisCache = new Redis(6379, process.env.NODE_ENV === "production" ? "shrimpcache" : "127.0.0.1");
 
         // every time the bot turns ready
         this.#client.on("ready", () => {
@@ -49,7 +43,6 @@ export default class shrimpBot{
         });
 
         this.#client.on("packet", async(packet) => {
-            // console.log(packet.t)
             switch (packet.t){
                 // when a message is sent check if the message includes the letters of shrimp
                 case "MESSAGE_CREATE": {
@@ -62,7 +55,7 @@ export default class shrimpBot{
                         this.#client.rest.channels.createReaction(packet.d.channel_id, packet.d.id, "🦐").catch(()=>{});
 
                         // brodcast new shrimp
-                        this.#redisPub.publish("newShrimp", "") 
+                        process.emit("newShrimp")
                     }
                     break;
                 }
@@ -83,22 +76,20 @@ export default class shrimpBot{
                     break;
                 }
                 case "GUILD_CREATE":{
-                    const redisData = await this.#redisCache.get(`shrimpGuild:${packet.d.id}`);
-                    if (redisData && packet.d.id !== redisData) return await this.#client.rest.users.leaveGuild(packet.d.id)
-
-                    this.guildCount++;
-
-                    this.#redisCache.set(`shrimpGuild:${packet.d.id}`, this.id)
-
+                    process.emit("shouldLeaveGuild", {guildID: packet.d.id, botID: this.id})
                     break;
                 }
                 case "GUILD_DELETE":{
                     this.guildCount--;
 
-                    this.#redisCache.del(`shrimpGuild:${packet.d.id}`)
+                    process.emit("guildRemove", {guildID: packet.d.id})
                     break;
                 }
             }
+        })
+
+        process.on("shouldLeaveGuildResponse", async(data) => {
+            if (data,botID === this.id && decision) await this.#client.rest.users.leaveGuild(data.guildID);
         })
     }
 

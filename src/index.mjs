@@ -1,4 +1,3 @@
-import Redis from "ioredis"
 import { WebSocketServer } from 'ws';
 
 import startAPI from './api.mjs'
@@ -10,25 +9,8 @@ import { tokens, botIDs } from "/static/config.mjs"
 // init db
 db`INSERT INTO stats (count, id) VALUES (0, 'shrimps') ON CONFLICT (id) DO NOTHING`.catch(err=>{})
 
-const ioredis = new Redis(6379, process.env.NODE_ENV === "production" ? "shrimpcache" : "127.0.0.1");
-const stream = ioredis.scanStream({
-    match: 'shrimpGuild:*'
-});
+const guildMap = new Map();
 
-await new Promise((resolve, reject) => {
-    stream.on('data', function (keys) {
-        if (keys.length) {
-            const pipeline = ioredis.pipeline();
-            keys.forEach(function (key) {
-                pipeline.del(key);
-            });
-
-            pipeline.exec();
-        }
-    });
-
-    stream.on('end', resolve);
-})
 function delay(t, data) {
     return new Promise(resolve => {
         setTimeout(resolve, t, data);
@@ -57,17 +39,21 @@ const wss = new WebSocketServer({
     path: "/ws"
 });
 
-const subscribeRedis = new Redis(6379, process.env.NODE_ENV === "production" ? "shrimpcache" : "127.0.0.1");
-
-subscribeRedis.subscribe("newShrimp");
-subscribeRedis.on("message", async (channel, message) => {
-    switch (channel){
-        case "newShrimp": {
-            const shrimpCount = await db`UPDATE stats SET count = count+1 WHERE id = 'shrimps' RETURNING count`.catch(err=>{})
-            Array.from(wss.clients).map(client => {
-                if (client.readyState === 1) client.send(shrimpCount[0].count);
-            })
-        }
-        break;
-    }
-});
+process.on("newShrimp", async() => {
+    const shrimpCount = await db`UPDATE stats SET count = count+1 WHERE id = 'shrimps' RETURNING count`.catch(err=>{})
+    Array.from(wss.clients).map(client => {
+        if (client.readyState === 1) client.send(shrimpCount[0].count);
+    })
+})
+process.on("guildRemove", (data) => {
+    guildMap.delete(data.guildID)
+})
+process.on("guildAdd", (data) => {
+    guildMap.set(data.guildID, data.botID)
+})
+process.on("shouldLeaveGuild", (data) => {
+    const hasGuild = guildMap.has(data.guildID)
+    const guildData = guildMap.get(data.guildID)
+    
+    process.emit("shouldLeaveGuildResponse", {guildID: data.guildID, botID: data.botID, decision: hasGuild && data.botID !== guildData})
+})
