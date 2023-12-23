@@ -1,13 +1,26 @@
 import { WebSocketServer } from 'ws';
+import Database from 'better-sqlite3';
 
 import startAPI from './api.mjs'
 import bot from "./bot.mjs"
-import db from "./utils/db.mjs";
+import postgres from "./utils/db.mjs";
 
 import { tokens, botIDs } from "/static/config.mjs"
 
 // init db
-db`INSERT INTO stats (count, id) VALUES (0, 'shrimps') ON CONFLICT (id) DO NOTHING`.catch(err=>{})
+const db = new Database("/static/database.db");
+try {
+    db.prepare('CREATE TABLE IF NOT EXISTS stats (id TEXT NOT NULL PRIMARY KEY, count INTEGER) WITHOUT ROWID').run()
+    db.prepare('INSERT INTO stats (id, count) VALUES (@id, @count)').run({
+        id: "shrimps",
+        count: 0
+    })
+} catch (error) {
+    console.log("table failed to create")
+    console.log(error)
+}
+
+postgres`INSERT INTO stats (count, id) VALUES (0, 'shrimps') ON CONFLICT (id) DO NOTHING`.catch(err=>{})
 
 const guildMap = new Map();
 
@@ -28,7 +41,7 @@ for (let index = 0; index < botIDs.length; index++) {
     botInstance.connect()
     botsArray.push(botInstance)
 
-    await delay(1000*5)
+    await delay(1000*10)
 }
 
 const expandedAPI = new startAPI(botsArray)
@@ -40,10 +53,21 @@ const wss = new WebSocketServer({
 });
 
 process.on("newShrimp", async() => {
-    const shrimpCount = await db`UPDATE stats SET count = count+1 WHERE id = 'shrimps' RETURNING count`.catch(err=>{})
+    const shrimpCount = await postgres`UPDATE stats SET count = count+1 WHERE id = 'shrimps' RETURNING count`.catch(err=>{})
+    db.prepare('UPDATE stats SET count = @count WHERE id = @id').run({
+        id: "shrimps",
+        count: shrimpCount[0].count
+    })
+
     Array.from(wss.clients).map(client => {
         if (client.readyState === 1) client.send(shrimpCount[0].count);
     })
+    process.emit("getShrimps")
+})
+process.on("getShrimps", () => {
+    const count = db.prepare('SELECT count FROM stats').all()[0].count
+    
+    process.emit("getShrimpsResponse", count)
 })
 process.on("guildRemove", (data) => {
     guildMap.delete(data.guildID)

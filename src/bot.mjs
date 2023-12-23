@@ -1,5 +1,4 @@
 import { Client } from "oceanic.js"
-import db from './utils/db.mjs'
 
 const shrimpChars = ["s", "h", "r", "i", "m", "p"]
 
@@ -62,14 +61,11 @@ export default class shrimpBot{
                 case "INTERACTION_CREATE": {
                     switch (packet.d.data.name){
                         case "shrimpcount": {
-                            // get shrimp count from database
-                            const dbResult = await db`SELECT count FROM stats WHERE id = 'shrimps'`.catch(err=>{})
-                
-                            // format the number
-                            const count = (dbResult[0]?.count ?? 0).toLocaleString()
-        
-                            // respond to the interaction
-                            this.#client.rest.interactions.createInteractionResponse(packet.d.id, packet.d.token, { type: 4, data: {"embeds": [{"description": `[${count} shrimps captured.](https://shrimp.numselli.xyz)`, "color": 16742221}]}}).catch(()=>{});
+                            process.once("getShrimpsResponse", (d)=>{
+                                this.#client.rest.interactions.createInteractionResponse(packet.d.id, packet.d.token, { type: 4, data: {"embeds": [{"description": `[${d.toLocaleString()} shrimps captured.](https://shrimp.numselli.xyz)`, "color": 16742221}]}}).catch(()=>{});
+                            })
+
+                            process.emit("getShrimps")
                         }
                         break;
                     }

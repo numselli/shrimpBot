@@ -4,7 +4,6 @@ import fastify from "fastify";
 import fastifyStatic from '@fastify/static'
 import fastifyView from '@fastify/view';
 import ejs from 'ejs'
-import db from "./utils/db.mjs";
 import {siteHost} from '/static/config.mjs'
 
 export default class api{
@@ -28,12 +27,14 @@ export default class api{
         });
 
         // listen to get requests on /
-        this.API.get("/", async(req, reply) => {
+        this.API.get("/", (req, reply) => {
             // get shrimp count from database
-            const dbResult = await db`SELECT count FROM stats WHERE id = 'shrimps'`.catch(err=>{})
-            
-            // render and send main page
-            return reply.view("/site/templates/index.ejs", { count: dbResult[0]?.count, host: siteHost });
+            process.once("getShrimpsResponse", (d)=>{
+                // render and send main page
+                reply.view("/site/templates/index.ejs", { count: d, host: siteHost });
+            })
+
+            process.emit("getShrimps")
         });
 
         // render and send privacy page
