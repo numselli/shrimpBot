@@ -1,4 +1,4 @@
-FROM node:20-alpine3.17
+FROM node:21.5-bookworm-slim
 
 ENV NODE_ENV production
 
