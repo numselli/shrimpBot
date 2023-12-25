@@ -5,9 +5,3 @@ export const botIDs = [
     '1042495791694086194'
 ]
 export const siteHost = 'https://shrimp.numselli.xyz'
-export const Postgrelogin = {
-    "user": "shrimpbot",
-    "password": "337823521",
-    "host": "shrimppostgres",
-    "port": 5432,
-}
