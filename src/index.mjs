@@ -19,45 +19,27 @@ try {
     console.log(error)
 }
 
+
 const guildMap = new Map();
-
-function delay(t, data) {
-    return new Promise(resolve => {
-        setTimeout(resolve, t, data);
-    });
-}
-
-
 const botsArray = []
-for (let index = 0; index < botIDs.length; index++) {
-    const botInstance = new bot({
-        botID: botIDs[index],
-        token: tokens[index]
-    })
-
-    botInstance.connect()
-    botsArray.push(botInstance)
-
-    await delay(1000*10)
-}
-
 const expandedAPI = new startAPI(botsArray)
 const API = expandedAPI.start()
-
 const wss = new WebSocketServer({
     server: API.server,
     path: "/ws"
 });
+
 
 process.on("newShrimp", async() => {
     db.prepare('UPDATE stats SET count = count+1 WHERE id = @id').run({
         id: "shrimps",
     })
 
+    const count = db.prepare('SELECT count FROM stats').all()[0].count
+
     Array.from(wss.clients).map(client => {
-        if (client.readyState === 1) client.send(shrimpCount[0].count);
+        if (client.readyState === 1) client.send(count);
     })
-    process.emit("getShrimps")
 })
 process.on("getShrimps", () => {
     const count = db.prepare('SELECT count FROM stats').all()[0].count
@@ -76,3 +58,22 @@ process.on("shouldLeaveGuild", (data) => {
     
     process.emit("shouldLeaveGuildResponse", {guildID: data.guildID, botID: data.botID, decision: hasGuild && data.botID !== guildData})
 })
+
+
+function delay(t, data) {
+    return new Promise(resolve => {
+        setTimeout(resolve, t, data);
+    });
+}
+
+for (let index = 0; index < botIDs.length; index++) {
+    const botInstance = new bot({
+        botID: botIDs[index],
+        token: tokens[index]
+    })
+
+    botInstance.connect()
+    botsArray.push(botInstance)
+
+    await delay(1000*10)
+}

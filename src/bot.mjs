@@ -85,7 +85,8 @@ export default class shrimpBot{
         })
 
         process.on("shouldLeaveGuildResponse", async(data) => {
-            if (data,botID === this.id && decision) await this.#client.rest.users.leaveGuild(data.guildID);
+            if (data.botID === this.id && data.decision) return await this.#client.rest.users.leaveGuild(data.guildID);
+            this.guildCount++;
         })
     }
 
