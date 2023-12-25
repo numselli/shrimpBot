@@ -3,7 +3,6 @@ import Database from 'better-sqlite3';
 
 import startAPI from './api.mjs'
 import bot from "./bot.mjs"
-import postgres from "./utils/db.mjs";
 
 import { tokens, botIDs } from "/static/config.mjs"
 
@@ -19,8 +18,6 @@ try {
     console.log("table failed to create")
     console.log(error)
 }
-
-postgres`INSERT INTO stats (count, id) VALUES (0, 'shrimps') ON CONFLICT (id) DO NOTHING`.catch(err=>{})
 
 const guildMap = new Map();
 
@@ -53,10 +50,8 @@ const wss = new WebSocketServer({
 });
 
 process.on("newShrimp", async() => {
-    const shrimpCount = await postgres`UPDATE stats SET count = count+1 WHERE id = 'shrimps' RETURNING count`.catch(err=>{})
-    db.prepare('UPDATE stats SET count = @count WHERE id = @id').run({
+    db.prepare('UPDATE stats SET count = count+1 WHERE id = @id').run({
         id: "shrimps",
-        count: shrimpCount[0].count
     })
 
     Array.from(wss.clients).map(client => {
