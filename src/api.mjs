@@ -8,8 +8,7 @@ import {siteHost} from '/static/config.mjs'
 
 export default class api{
     constructor(botsArray){
-        this.botsArray = botsArray,
-        this.mainBotID = this.botsArray[0].botID
+        this.botsArray = botsArray;
 
         // create a fastify webserver
         this.API = fastify();
@@ -32,7 +31,7 @@ export default class api{
             // get shrimp count from database
             process.once("getShrimpsResponse", (d)=>{
                 // render and send main page
-                reply.view("/site/templates/index.ejs", { count: d, host: siteHost, mainBotID: this.mainBotID });
+                reply.view("/site/templates/index.ejs", { count: d, host: siteHost, mainBotID: this.botsArray[0].id });
             })
 
             process.emit("getShrimps")
@@ -40,11 +39,11 @@ export default class api{
 
         // render and send privacy page
         this.API.get("/privacy", (req, reply) => {
-            reply.view("/site/templates/privacy.ejs", {host: siteHost, mainBotID: this.mainBotID});
+            reply.view("/site/templates/privacy.ejs", {host: siteHost, mainBotID: this.botsArray[0].id});
         });
 
         this.API.get("/invite", (req, reply) => {
-            reply.view("/site/templates/invite.ejs", {bots: this.botsArray, host: siteHost, mainBotID: this.mainBotID});
+            reply.view("/site/templates/invite.ejs", {bots: this.botsArray, host: siteHost, mainBotID: this.botsArray[0].id});
         });
 
         // robots.txt file
@@ -57,7 +56,7 @@ export default class api{
 
         // send 404 page for all other pages
         this.API.get("/*", (req, reply) => {
-            reply.view("/site/templates/404.ejs", {host: siteHost, mainBotID: this.mainBotID});
+            reply.view("/site/templates/404.ejs", {host: siteHost, mainBotID: this.botsArray[0].id});
         });
     }
 
