@@ -103,7 +103,7 @@ if (statKey !== ""){
             }),
             headers: {
                 "Content-Type": "application/json",
-                'Authorization': tokens[list.domain],
+                'Authorization': statKey,
             }
         })
 
