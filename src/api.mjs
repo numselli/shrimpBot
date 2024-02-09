@@ -9,7 +9,7 @@ import {siteHost} from '/static/config.mjs'
 export default class api{
     constructor(botsArray){
         this.botsArray = botsArray,
-        this.mainBotID = this.botsArray[0].id
+        this.mainBotID = this.botsArray[0].botID
 
         // create a fastify webserver
         this.API = fastify();
