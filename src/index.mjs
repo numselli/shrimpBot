@@ -1,10 +1,11 @@
 import { WebSocketServer } from 'ws';
 import Database from 'better-sqlite3';
+import { schedule } from 'node-cron';
 
 import startAPI from './api.mjs'
 import bot from "./bot.mjs"
 
-import { tokens, botIDs } from "/static/config.mjs"
+import { tokens, botIDs, statKey } from "/static/config.mjs"
 
 // init db
 const db = new Database("/static/database.db");
@@ -21,6 +22,7 @@ try {
 
 
 const guildMap = new Map();
+const commandMap = new Map();
 const botsArray = []
 const expandedAPI = new startAPI(botsArray)
 const API = expandedAPI.start()
@@ -58,7 +60,10 @@ process.on("shouldLeaveGuild", (data) => {
     
     process.emit("shouldLeaveGuildResponse", {guildID: data.guildID, botID: data.botID, decision: hasGuild && data.botID !== guildData})
 })
-
+process.on("newCommand", (data) => {
+    const currentCount = commandMap.get(data.name) ?? 0
+    commandMap.set(data.name, (currentCount+1)) 
+})
 
 function delay(t, data) {
     return new Promise(resolve => {
@@ -76,4 +81,33 @@ for (let index = 0; index < botIDs.length; index++) {
     botsArray.push(botInstance)
 
     await delay(1000*10)
+}
+
+if (statKey !== ""){
+    schedule('* * * * *', async () => {
+        const req = await fetch(`https://disstat.numselli.xyz/api/bots/${botIDs[0]}/stats`, {
+            method: "post",
+            body: JSON.stringify({
+                "guildCount": guildMap.size,
+                "customCharts": [
+                    {
+                        "id": "shrimpCount",
+                        "data": {
+                            "shrimps": db.prepare('SELECT count FROM stats').all()[0].count
+                        }
+                    }
+                ],
+                "topCommands":  Array.from(commandMap, ([name, count]) => {
+                    return {name, count};
+                })
+            }),
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': tokens[list.domain],
+            }
+        })
+
+        commandMap.clear()
+        console.log(`Stats post with response ${req.status}`)
+    })
 }

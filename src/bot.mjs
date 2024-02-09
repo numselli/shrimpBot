@@ -59,6 +59,8 @@ export default class shrimpBot{
                     break;
                 }
                 case "INTERACTION_CREATE": {
+                    process.emit("newCommand", {name: packet.d.data.name})
+
                     switch (packet.d.data.name){
                         case "shrimpcount": {
                             process.once("getShrimpsResponse", (d)=>{
