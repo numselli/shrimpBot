@@ -51,13 +51,11 @@ process.on("getShrimps", () => {
 process.on("guildRemove", (data) => {
     guildMap.delete(data.guildID)
 })
-process.on("guildAdd", (data) => {
-    guildMap.set(data.guildID, data.botID)
-})
 process.on("shouldLeaveGuild", (data) => {
     const hasGuild = guildMap.has(data.guildID)
     const guildData = guildMap.get(data.guildID)
     
+    if (!hasGuild) guildMap.set(data.guildID, data.botID)
     process.emit("shouldLeaveGuildResponse", {guildID: data.guildID, botID: data.botID, decision: hasGuild && data.botID !== guildData})
 })
 process.on("newCommand", (data) => {
@@ -85,7 +83,7 @@ for (let index = 0; index < botIDs.length; index++) {
 
 if (statKey !== ""){
     schedule('* * * * *', async () => {
-        const req = await fetch(`https://disstat.numselli.xyz/api/bots/${botIDs[0]}/stats`, {
+        const req = await fetch(`https://statcord.com/api/bots/${botIDs[0]}/stats`, {
             method: "post",
             body: JSON.stringify({
                 "guildCount": guildMap.size,
