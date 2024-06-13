@@ -9,13 +9,13 @@ import fastifyStatic from '@fastify/static'
 import fastifyView from '@fastify/view';
 import ejs from 'ejs'
 
-import { tokens, botIDs, statKey, siteHost } from "./static/config.mjs"
+import { tokens, botIDs, statKey, siteHost } from "/static/config.mjs"
 
 
 import bot from './bot.mjs'
 
 // init db
-const db = new Database("./static/database.db");
+const db = new Database("/static/database.db");
 try {
     db.prepare('CREATE TABLE IF NOT EXISTS stats (id TEXT NOT NULL PRIMARY KEY, count INTEGER) WITHOUT ROWID').run()
     db.prepare('INSERT INTO stats (id, count) VALUES (@id, @count)').run({
