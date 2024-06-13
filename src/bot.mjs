@@ -6,7 +6,6 @@ export default class shrimpBot{
     #client
     constructor(clientInfo){
         this.id = clientInfo.botID
-        this.guildCount = 0
         
         // create the discord client
         this.#client = new Client({
@@ -34,6 +33,7 @@ export default class shrimpBot{
             ])
         });
 
+
         // An error handler
         this.#client.on("error", (error) => {
             if (error.message.includes("Server didn't acknowledge previous heartbeat"))  process.exit();
@@ -51,10 +51,21 @@ export default class shrimpBot{
                     // check if the message has the letters
                     if (shrimpChars.every(char=>lowerMsg.includes(char))){
                         // if it has the letters add the reaction
-                        this.#client.rest.channels.createReaction(packet.d.channel_id, packet.d.id, "🦐").catch(()=>{});
+                        this.#client.rest.channels.createReaction(packet.d.channel_id, packet.d.id, "🦐").catch((e)=>{
+                            console.log(e)
+                        });
 
                         // brodcast new shrimp
                         process.emit("newShrimp")
+
+                        if (packet.d.author.id === this.id) return;
+
+                        this.#client.rest.channels.createMessage(packet.d.channel_id, {
+                            messageReference: {
+                                messageID: packet.d.id
+                            },
+                            content: `The main shrimp bot has now been verified. Please kick this bot and [invite the main bot](https://discord.com/oauth2/authorize?client_id=1042495791694086194&permissions=65600&scope=bot).`
+                        }).catch(()=>{});
                     }
                     break;
                 }
@@ -73,22 +84,7 @@ export default class shrimpBot{
                     }
                     break;
                 }
-                case "GUILD_CREATE":{
-                    process.emit("shouldLeaveGuild", {guildID: packet.d.id, botID: this.id})
-                    break;
-                }
-                case "GUILD_DELETE":{
-                    this.guildCount--;
-
-                    process.emit("guildRemove", {guildID: packet.d.id})
-                    break;
-                }
             }
-        })
-
-        process.on("shouldLeaveGuildResponse", async(data) => {
-            if (data.botID === this.id && data.decision) return await this.#client.rest.users.leaveGuild(data.guildID);
-            this.guildCount++;
         })
     }
 
