@@ -143,7 +143,7 @@ client.on("ready", () => {
 // the first time the bot is ready
 client.once("ready", async() => {
     // create shrimpcount slash command
-    client.rest.applicationCommands.bulkEditGlobalCommands(this.id, [
+    client.application.bulkEditGlobalCommands([
         {
             "name": "shrimpcount",
             "type": 1,
