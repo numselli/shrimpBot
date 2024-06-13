@@ -207,7 +207,7 @@ if (statKey !== ""){
         const req = await fetch(`https://statcord.com/api/bots/1042495791694086194/stats`, {
             method: "post",
             body: JSON.stringify({
-                "guildCount": client.guilds.size(),
+                "guildCount": client.guilds.size,
                 "customCharts": [
                     {
                         "id": "shrimpCount",
