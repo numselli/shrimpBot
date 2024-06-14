@@ -90,7 +90,7 @@ API.get("/privacy", (req, reply) => {
 });
 
 API.get("/invite", (req, reply) => {
-    reply.redirect('https://stackoverflow.com/')
+    reply.redirect('https://discord.com/oauth2/authorize?client_id=1042495791694086194&permissions=65600&scope=bot')
 });
 
 // robots.txt file
