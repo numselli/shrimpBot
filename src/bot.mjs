@@ -18,21 +18,8 @@ export default class shrimpBot{
 
         // every time the bot turns ready
         this.#client.on("ready", () => {
-            this.#client.editStatus("dnd");
+            this.#client.editStatus("idle");
         });
-
-        // the first time the bot is ready
-        this.#client.once("ready", async() => {
-            // create shrimpcount slash command
-            this.#client.rest.applicationCommands.bulkEditGlobalCommands(this.id, [
-                {
-                    "name": "shrimpcount",
-                    "type": 1,
-                    "description": "The number of shrimps."
-                }
-            ])
-        });
-
 
         // An error handler
         this.#client.on("error", (error) => {
