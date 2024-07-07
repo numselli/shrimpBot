@@ -191,8 +191,8 @@ client.on("packet", async(packet) => {
                 break;
             }
 
-            const currentCount = commandMap.get(data.name) ?? 0
-            commandMap.set(data.name, (currentCount+1)) 
+            const currentCount = commandMap.get(packet.d.data.name) ?? 0
+            commandMap.set(packet.d.data.name, (currentCount+1)) 
             break;
         }
     }
