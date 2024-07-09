@@ -161,18 +161,6 @@ const addShrimp = () => {
     })
 }
 
-const internalWS = new WebSocketServer({
-    port: 8899,
-
-});
-internalWS.on('connection', function connection(ws) {
-    ws.on('error', console.error);
-  
-    ws.on('message', function message(data) {
-      if (data == "newShrimp") addShrimp()
-    });
-});
-
 
 const shrimpChars = ["s", "h", "r", "i", "m", "p"]
 
