@@ -1,9 +1,5 @@
-export const tokens = [
-    'Bot TOKEN'
-]
-export const botIDs = [
-    '1042495791694086194'
-]
+export const token = 'Bot TOKEN'
+
 export const siteHost = 'https://shrimp.numselli.xyz'
 
 export const statKey = "" // leave empty to disable stats posting
