@@ -1,5 +1,7 @@
 export const token = 'Bot TOKEN'
 
+export const PUBLIC_KEY = 'PUBLIC_KEY'
+
 export const siteHost = 'https://shrimp.numselli.xyz'
 
 export const statKey = "" // leave empty to disable stats posting
