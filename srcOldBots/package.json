@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "oceanic.js": "^1.10.5-dev.9f95b4a",
-    "ws": "^8.13.0"
+    "oceanic.js": "^1.11.0",
+    "ws": "^8.18.0"
   }
 }

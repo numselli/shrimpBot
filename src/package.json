@@ -1,12 +1,12 @@
 {
   "dependencies": {
-    "@fastify/static": "^7.0.0",
-    "@fastify/view": "^8.2.0",
-    "better-sqlite3": "^9.2.2",
-    "ejs": "^3.1.9",
-    "fastify": "^4.17.0",
+    "@fastify/static": "^7.0.4",
+    "@fastify/view": "^9.1.0",
+    "better-sqlite3": "^11.1.2",
+    "ejs": "^3.1.10",
+    "fastify": "^4.28.1",
     "node-cron": "github:counting-bot/node-cron",
-    "oceanic.js": "^1.10.5-dev.9f95b4a",
-    "ws": "^8.13.0"
+    "oceanic.js": "^1.11.0",
+    "ws": "^8.18.0"
   }
 }
