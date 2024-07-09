@@ -13,3 +13,13 @@ services:
     container_name: shrimpBot
     ports:
       - 8114:8114
+
+
+  oldshrimpbots:
+    build: ./srcOldBots
+    restart: unless-stopped
+    volumes:
+      - ShrimpStatic:/static
+    container_name: oldshrimpbots
+    depends_on: 
+      - shrimpbot

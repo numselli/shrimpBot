@@ -9,10 +9,7 @@ import fastifyStatic from '@fastify/static'
 import fastifyView from '@fastify/view';
 import ejs from 'ejs'
 
-import { tokens, botIDs, statKey, siteHost } from "/static/config.mjs"
-
-
-import bot from './bot.mjs'
+import { token, statKey, siteHost } from "/static/config.mjs"
 
 // init db
 const db = new Database("/static/database.db");
@@ -25,37 +22,6 @@ try {
 } catch (error) {
     console.log("table failed to create")
     console.log(error)
-}
-
-// legacy
-const botsArray = []
-process.on("newShrimp", async() => {
-    db.prepare('UPDATE stats SET count = count+1 WHERE id = @id').run({
-        id: "shrimps",
-    })
-})
-process.on("getShrimps", () => {
-    const count = db.prepare('SELECT count FROM stats').all()[0].count
-    
-    process.emit("getShrimpsResponse", count)
-})
-function delay(t, data) {
-    return new Promise(resolve => {
-        setTimeout(resolve, t, data);
-    });
-}
-for (let index = 0; index < botIDs.length; index++) {
-    if (index !== 0){
-        const botInstance = new bot({
-            botID: botIDs[index],
-            token: tokens[index]
-        })
-    
-        botInstance.connect()
-        botsArray.push(botInstance)
-    
-        await delay(1000*10)
-    }
 }
 
 
@@ -117,12 +83,36 @@ const wss = new WebSocketServer({
     path: "/ws"
 });
 
+const addShrimp = () => {
+    // brodcast new shrimp
+    db.prepare('UPDATE stats SET count = count+1 WHERE id = @id').run({
+        id: "shrimps",
+    })
+
+    const count = getShrimps()
+    Array.from(wss.clients).map(client => {
+        if (client.readyState === 1) client.send(count);
+    })
+}
+
+const internalWS = new WebSocketServer({
+    port: 8899,
+
+});
+internalWS.on('connection', function connection(ws) {
+    ws.on('error', console.error);
+  
+    ws.on('message', function message(data) {
+      if (data == "newShrimp") addShrimp()
+    });
+});
+
 
 const shrimpChars = ["s", "h", "r", "i", "m", "p"]
 
 // create the discord client
 const client = new Client({
-    auth: tokens[0],
+    auth: token,
     // disableCache: "no-warning",
     collectionLimits: {
         auditLogEntries: 0,
@@ -136,7 +126,7 @@ const client = new Client({
 });
 
 // every time the bot turns ready
-client.on("ready", () => {
+client.on("ready", () => {data
     client.editStatus("dnd");
 });
 
@@ -169,15 +159,7 @@ client.on("packet", async(packet) => {
                 // if it has the letters add the reaction
                 client.rest.channels.createReaction(packet.d.channel_id, packet.d.id, "🦐").catch(()=>{});
 
-                // brodcast new shrimp
-                db.prepare('UPDATE stats SET count = count+1 WHERE id = @id').run({
-                    id: "shrimps",
-                })
-
-                const count = getShrimps()
-                Array.from(wss.clients).map(client => {
-                    if (client.readyState === 1) client.send(count);
-                })
+                addShrimp()
             }
             break;
         }
