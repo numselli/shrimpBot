@@ -1,4 +1,4 @@
-FROM node:21.7.3-bookworm-slim
+FROM node:22.4.1-bookworm-slim
 
 ENV NODE_ENV production
 
