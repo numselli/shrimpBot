@@ -8,8 +8,11 @@ import fastify from "fastify";
 import fastifyStatic from '@fastify/static'
 import fastifyView from '@fastify/view';
 import ejs from 'ejs'
+import rawBody from 'fastify-raw-body';
 
-import { token, statKey, siteHost } from "/static/config.mjs"
+import verifyKey from './utils/verifyKey.mjs'
+
+import { token, statKey, siteHost, PUBLIC_KEY } from "/static/config.mjs"
 
 // init db
 const db = new Database("/static/database.db");
@@ -26,7 +29,6 @@ try {
 
 
 // main bot
-const commandMap = new Map();
 const API = fastify();
 
 const getShrimps = () => db.prepare('SELECT count FROM stats').all()[0].count
@@ -43,6 +45,27 @@ API.register(fastifyView, {
         ejs
     },
 });
+await API.register(rawBody, { 
+    runFirst: true, 
+}); 
+
+API.addHook("preHandler", async (request, response) => {
+	// We don't want to check GET requests to our root url
+	if (request.method === "POST") {
+		const signature = request.headers["x-signature-ed25519"]; 
+		const timestamp = request.headers["x-signature-timestamp"]; 
+		const isValidRequest = await verifyKey(
+			request.rawBody, 
+			signature, 
+			timestamp, 
+			PUBLIC_KEY
+		); 
+		if (!isValidRequest) {
+			return response.status(401).send("invalid request signature"); 
+		} 
+	} 
+}); 
+
 
 // listen to get requests on /
 API.get("/", (req, reply) => {
@@ -55,9 +78,37 @@ API.get("/privacy", (req, reply) => {
     reply.view("/site/templates/privacy.ejs", {host: siteHost});
 });
 
+// redirect to bot invite
 API.get("/invite", (req, reply) => {
     reply.redirect('https://discord.com/oauth2/authorize?client_id=1042495791694086194&permissions=65600&scope=bot')
 });
+
+// centrally handle interactions
+API.post("/api/interactions", (req, reply) => {
+    const message = req.body
+
+    switch (message.type){
+        case 1: {
+            reply.status(200).send({
+                type: 1
+            });
+        } break;
+        case 2: {
+            switch (message.data.name){
+                case "shrimpcount": {
+                    const shrimps = getShrimps()
+                    reply.status(200).send({
+                        type: 4, 
+                        data: {
+                            "embeds": [{"description": `[${shrimps.toLocaleString()} shrimps captured.](https://shrimp.numselli.xyz)`, "color": 16742221}]
+                        }, 
+                    }); 
+                } break;
+            }
+        } break;
+    }
+});
+
 
 // robots.txt file
 API.get('/robots.txt', (req, reply) => {
@@ -84,14 +135,14 @@ const wss = new WebSocketServer({
 });
 
 const addShrimp = () => {
-    // brodcast new shrimp
-    db.prepare('UPDATE stats SET count = count+1 WHERE id = @id').run({
+    // update shrimp count
+    const row = db.prepare('UPDATE stats SET count = count+1 WHERE id = @id RETURNING count').get({
         id: "shrimps",
     })
-
-    const count = getShrimps()
-    Array.from(wss.clients).map(client => {
-        if (client.readyState === 1) client.send(count);
+    
+    // brodcast new shrimp
+    wss.clients.forEach(client=>{
+        if (client.readyState === 1) client.send(row.count);
     })
 }
 
@@ -113,7 +164,6 @@ const shrimpChars = ["s", "h", "r", "i", "m", "p"]
 // create the discord client
 const client = new Client({
     auth: token,
-    // disableCache: "no-warning",
     collectionLimits: {
         auditLogEntries: 0,
         members: 0,
@@ -126,7 +176,7 @@ const client = new Client({
 });
 
 // every time the bot turns ready
-client.on("ready", () => {data
+client.on("ready", () => {
     client.editStatus("dnd");
 });
 
@@ -148,38 +198,23 @@ client.on("error", (error) => {
 });
 
 client.on("packet", async(packet) => {
-    switch (packet.t){
-        // when a message is sent check if the message includes the letters of shrimp
-        case "MESSAGE_CREATE": {
-            // convert the message to lower case
-            const lowerMsg = packet.d.content.toLowerCase()
+    // when a message is sent check if the message includes the letters of shrimp
+    if (packet.t !== "MESSAGE_CREATE") return;
+ 
+    // convert the message to lower case
+    const lowerMsg = packet.d.content.toLowerCase()
 
-            // check if the message has the letters
-            if (shrimpChars.every(char=>lowerMsg.includes(char))){
-                // if it has the letters add the reaction
-                client.rest.channels.createReaction(packet.d.channel_id, packet.d.id, "🦐").catch(()=>{});
+    // check if the message has the letters
+    if (!shrimpChars.every(char=>lowerMsg.includes(char))) return;
 
-                addShrimp()
-            }
-            break;
-        }
-        case "INTERACTION_CREATE": {
-            switch (packet.d.data.name){
-                case "shrimpcount": {
-                    const shrimps = getShrimps()
+    // add shrimp reaction
+    client.rest.channels.createReaction(packet.d.channel_id, packet.d.id, "🦐").catch(()=>{});
 
-                    client.rest.interactions.createInteractionResponse(packet.d.id, packet.d.token, { type: 4, data: {"embeds": [{"description": `[${shrimps.toLocaleString()} shrimps captured.](https://shrimp.numselli.xyz)`, "color": 16742221}]}}).catch(()=>{});
-                }
-                break;
-            }
-
-            const currentCount = commandMap.get(packet.d.data.name) ?? 0
-            commandMap.set(packet.d.data.name, (currentCount+1)) 
-            break;
-        }
-    }
+    // add shrimp count
+    addShrimp()
 })
 
+// connect the discord client
 client.connect()
 
 
@@ -197,10 +232,7 @@ if (statKey !== ""){
                             "shrimps": shrimps
                         }
                     }
-                ],
-                "topCommands":  Array.from(commandMap, ([name, count]) => {
-                    return {name, count};
-                })
+                ]
             }),
             headers: {
                 "Content-Type": "application/json",
