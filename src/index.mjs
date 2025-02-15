@@ -243,7 +243,6 @@ if (statKey !== ""){
             }
         })
 
-        commandMap.clear()
         console.log(`Stats post with response ${req.status}`)
     })
 }
