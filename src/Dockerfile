@@ -1,4 +1,4 @@
-FROM node:24.0.1-alpine3.20
+FROM node:24.10.0-alpine3.22
 ENV NODE_ENV production
 
 EXPOSE 8114
