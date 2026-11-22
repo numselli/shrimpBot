@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@fastify/static": "^10.1.11",
+    "@fastify/static": "^10.1.12",
     "@fastify/view": "^12.0.1",
     "better-sqlite3": "^13.2.0",
     "ejs": "^7.0.2",
